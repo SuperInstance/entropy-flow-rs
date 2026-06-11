@@ -1,6 +1,9 @@
 [package]
 name = "entropy-flow-rs"
 version = "0.1.0"
-edition = "2024"
+description = "A Rust library for Entropy Flow Rs"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/casey-digennaro/entropy-flow-rs"
+edition = "2021"
 
 [dependencies]
