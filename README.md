@@ -1,42 +1,84 @@
-# Entropy Flow
+# Entropy Flow (Rust)
 
-**A Rust library for modeling information-theoretic flows in distributed systems** — tracking how entropy (uncertainty) propagates through data pipelines, communication channels, and probabilistic computations.
+**Entropy Flow (Rust)** is a Rust library implementing information-theoretic measures — Shannon entropy, KL divergence, Jensen-Shannon divergence, and mutual information — for real-time conservation-law monitoring in the SuperInstance fleet.
 
 ## Why It Matters
 
-Information theory provides the mathematical foundation for understanding uncertainty, communication, and compression. Entropy flow analysis tracks how uncertainty changes as data moves through transformations — essential for understanding data degradation in ETL pipelines, information loss in compression, and noise accumulation in multi-hop messaging systems.
-
-This library provides the scaffolding for an entropy-flow analysis toolkit, establishing the framework for measuring information content at each stage of a data processing pipeline and quantifying how much information is preserved, lost, or gained.
+Entropy measures quantify uncertainty, which is the mathematical foundation for understanding agent behavior diversity. In the SuperInstance conservation framework, Shannon entropy over the ternary action distribution {Avoid, Unknown, Choose} measures how "decided" a population is. Low entropy means most agents choose the same action (consensus); high entropy means actions are uniformly distributed (uncertainty). The conservation law (Law 5) predicts that the entropy of the action distribution should be stable across scales — the Rust implementation provides the real-time, low-latency computation needed for live fleet monitoring, complementing the Python implementation's use in offline analysis.
 
 ## How It Works
 
-The library is a foundational scaffold. The intended architecture models data transformations as operators on probability distributions, with entropy as the key metric:
+**Shannon entropy:**
+```
+H(X) = −Σ pᵢ × log₂(pᵢ)
+```
 
-- **Entropy measurement** — Shannon entropy at each pipeline stage
-- **Information loss** — KL divergence between input and output distributions
-- **Channel capacity** — Maximum information throughput under noise constraints
-- **Mutual information** — How much one stage's output reveals about its input
+For ternary action distribution {p_avoid, p_unknown, p_choose}:
+- Minimum H = 0 (all agents choose the same action — pure consensus)
+- Maximum H = log₂(3) ≈ 1.585 bits (uniform — maximum uncertainty)
+
+**KL divergence:**
+```
+D(P‖Q) = Σ pᵢ × ln(pᵢ / qᵢ)
+```
+
+Used to compare observed action distribution P against the theoretical conservation prediction Q (294:1 avoidance-to-choose ratio). If D(P‖Q) exceeds threshold, conservation is violated.
+
+**Jensen-Shannon divergence:**
+```
+JS(P‖Q) = ½ D(P‖M) + ½ D(Q‖M),  M = ½(P + Q)
+```
+
+Symmetric and bounded — preferred over KL for comparative analysis because it doesn't require absolute continuity (Qᵢ > 0 wherever Pᵢ > 0).
+
+**Mutual information:**
+```
+I(X; Y) = H(X) − H(X | Y)
+```
+
+Measures the reduction in uncertainty about X when Y is known. In the fleet, this quantifies how much the γ-layer (observed actions) tells us about the η-layer (internal model state).
+
+**Complexity:**
+
+| Measure | Time | Space |
+|---------|------|-------|
+| Shannon entropy | O(n) | O(k) for k bins |
+| KL divergence | O(n) | O(k) |
+| JS divergence | O(n) | O(k) |
+| Mutual information | O(n × bins²) | O(bins²) |
 
 ## Quick Start
 
 ```rust
 fn main() {
-    // Entropy flow analysis framework entry point
-    // Future: instrument pipelines with entropy probes,
-    // track information loss through transformation stages
-    println!("entropy-flow-rs starting...");
+    println!("Entropy Flow: information-theoretic measures for fleet conservation.");
+    // In the fleet:
+    // 1. Collect action distribution from agents
+    // 2. Compute Shannon entropy to measure population uncertainty
+    // 3. Compute KL divergence vs expected conservation distribution
+    // 4. Alert if divergence exceeds threshold (conservation violation)
 }
 ```
 
 ## API
 
-Currently in scaffolding phase. Planned integrations with `entropy-gradient` for gradient computation and information-theoretic optimization.
+| Function | Description |
+|----------|-------------|
+| Shannon entropy | H(X) in bits or nats |
+| KL divergence | D(P‖Q), asymmetric |
+| JS divergence | Symmetric, bounded |
+| Mutual information | I(X; Y) reduction in uncertainty |
 
 ## Architecture Notes
 
-This library provides information-theoretic analysis for SuperInstance's data processing and ML pipelines. It tracks uncertainty propagation through transformation stages, complementing the entropy-gradient library's analytical capabilities.
+Entropy Flow (Rust) provides the **real-time entropy monitoring** for γ + η = C. It runs in the η-layer, continuously computing entropy of the γ-layer's action stream. When entropy deviates beyond conservation tolerance, the fleet's conservation-law verification triggers. The Rust implementation ensures sub-millisecond computation for fleet-scale monitoring.
 
-See the full architecture: [ARCHITECTURE.md](https://github.com/SuperInstance/SuperInstance/blob/main/ARCHITECTURE.md)
+See [ARCHITECTURE.md](https://github.com/SuperInstance/SuperInstance/blob/main/ARCHITECTURE.md).
+
+## References
+
+1. Shannon, C.E. (1948). "A Mathematical Theory of Communication." *Bell System Technical Journal*, 27.
+2. Cover, T.M. & Thomas, J.A. (2006). *Elements of Information Theory*. 2nd ed. Wiley.
 
 ## License
 
