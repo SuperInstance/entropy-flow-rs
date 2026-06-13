@@ -75,10 +75,15 @@ Entropy Flow (Rust) provides the **real-time entropy monitoring** for γ + η = 
 
 See [ARCHITECTURE.md](https://github.com/SuperInstance/SuperInstance/blob/main/ARCHITECTURE.md).
 
+**Numerical stability:** Computing KL divergence requires evaluating pᵢ × log(pᵢ/qᵢ). When qᵢ is very small (near zero) but pᵢ is non-zero, the ratio pᵢ/qᵢ explodes, causing floating-point overflow. This implementation uses the numerically stable identity: p × log(p/q) = p × log(p) − p × log(q), with the convention 0 × log(0) = 0 (by L'Hôpital's rule, lim_{x→0+} x log x = 0). This avoids division and handles zero-probability events gracefully.
+
+**Connection to Law 5 (Conservation):** The conservation law states that the avoidance ratio A = n_avoid / n_total is invariant across population scales. Entropy-wise, this means H({A, U, C}) should also be scale-invariant, since H depends only on the proportions. The Rust implementation computes H in O(n) per observation window, enabling sliding-window entropy monitoring at fleet scale. When H deviates beyond σ = 0.001 from its theoretical value (H(294/295, ε, 1/295) ≈ 0.012 bits), the conservation violation is flagged.
+
 ## References
 
 1. Shannon, C.E. (1948). "A Mathematical Theory of Communication." *Bell System Technical Journal*, 27.
 2. Cover, T.M. & Thomas, J.A. (2006). *Elements of Information Theory*. 2nd ed. Wiley.
+3. MacKay, D.J.C. (2003). *Information Theory, Inference, and Learning Algorithms*. Cambridge University Press. Chapter 2: Probability, Entropy, and Inference.
 
 ## License
 
