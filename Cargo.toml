@@ -1,9 +1,11 @@
 [package]
 name = "entropy-flow-rs"
 version = "0.1.0"
-description = "A Rust library for Entropy Flow Rs"
+description = "Entropy Flow Rs — Rust implementation with the SuperInstance polyformalism canary wired in."
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/casey-digennaro/entropy-flow-rs"
+repository = "https://github.com/SuperInstance/entropy-flow-rs"
 edition = "2021"
+
+keywords = ["entropy-flow-rs"]
 
 [dependencies]
